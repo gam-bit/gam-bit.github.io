@@ -1,7 +1,7 @@
 ---
-title: "Welcome to Jekyll!"
-date: 2020-12-06 22:57:28 -0400
-categories: jekyll update
+title: "2020-12-20(일) | 일일 코로나 심각성 지수"
+date: 2020-12-20 10:34:28 -0400
+categories: 코로나 코로나심각성지수 코로나체감지수
 ---
 
 # 테스트 포스트
