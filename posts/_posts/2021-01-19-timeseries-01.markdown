@@ -1,0 +1,75 @@
+---
+layout: post
+title:  "시계열 데이터 예측에서 주의할 사항"
+date:   2021-01-19 09:35:00 +0900
+categories: deeplearning
+---
+
+
+시계열 데이터를 예측한다고 하면 순환 신경망인 RNN, LSTM, GRU를 떠올리기 쉽다.
+
+그러나 모델을 사용하기 전에 먼저 생각해보아야 할 주의사항이 2가지 있다.
+
+>**1. DATA FRAMING**
+>
+>**2. VALIDATION METHOD** 
+
+순서대로 살펴보자.
+
+
+
+## 1. DATA FRAMING 
+
+~~내가 시계열 데이터를 예측할 때 제일 헷갈렸던 부분이다.~~ 
+
+DATA FRAMING은 시계열 데이터의 예측 범위를 나타낸다.
+
+예를 들어 전력량을 예측하는 상황을 가정하자. 그러면 우리는 과거의 데이터로 미래의 전력량 수요를 예측할 수 있는데, Framing에 따라 다양한 방식으로 예측이 가능하다.
+
+- 다음 날의 시간 단위 전력량 예측
+- 다음 주의 일별 전력량 예측
+- 다음 달의 일별 전력량 예측
+- 내년의 월별 전력량 예측
+
+위와 같이 예측 범위(DATA FRAME) 설정 방법은 다양하게 존재한다. DATA FRAMING은 데이터를 전처리하는 방식과 모델에 영향을 미친다.
+
+
+- 전처리 측면에서 본다면, 어떤 y를 예측하느냐에 따라 유의미한 feature가 달라질 수 있다.
+
+- 모델링 측면에서는, FRAME에 따라 (input도 그렇지만 특히) output의 차원이 바뀌면서 모델이 달라진다.  
+
+
+
+## 2. VALIDATION METHOD
+
+시계열 모델에서는 train test set을 나눌 때 랜덤하게 나누면 안 되고 시계열 구조를 유지해야 한다. 랜덤하게 나누면 데이터의 시간 의존성(정보)를 잃는다.
+
+이런 방법을 walk forward cross validation이라 한다.
+
+아이디어는 간단하다. 처음엔 작은 시계열 segment를 가지고 모델을 만든다. 만약 t시간까지의 데이터로 모델을 만들었다면 다음의 t+n까지의 값을 예측하고 에러를 계산한다. 이 과정을 마지막 test segment까지 이동하면서 계속 반복한다.
+
+
+![image](https://user-images.githubusercontent.com/58651942/105012752-d40f8500-5a81-11eb-90aa-84452d5f6e94.png)
+
+그런데 필자는 train을 맨 처음부터 가져오지 않고 train + test 기간을 동일하게 다음과 같이 잘라서 cross validation 했다.
+
+![image](https://user-images.githubusercontent.com/58651942/105014037-45036c80-5a83-11eb-9259-8f3d69b25215.png)
+
+walk forward cross validation을 검색해보면 위 아래 그림 둘 다 나온다. 본인에게 적절한 모델을 사용하면 좋을 것 같다. 나는 최근 데이터를 사용하여 예측하고 싶어서 아래 방식을 선택했다.
+
+
+
+## 3. 모델
+
+ 필자는 앙상블을 사용한 머신러닝을 이용해서 시계열을 예측해보았다. 
+ 
+ 만약 30일 데이터를 가지고 다음 날의 값을 예측하고 싶다면, 30일 데이터가 각각 서로 다른 변수가 된다. 다시 말해서 X에 30개의 칼럼이 생긴다. 
+
+ 이렇게 만들어진 데이터는 시간 정보를 잃은 데이터이다. 
+
+ 데이터의 시간 정보를 사용하려면 DeepLearning 방식을 사용해야 한다 
+
+
+
+### Reference
+- https://machinelearningmastery.com/how-to-load-and-explore-household-electricity-usage-data/

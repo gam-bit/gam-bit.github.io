@@ -18,7 +18,7 @@ remote_theme: mmistakes/so-simple-theme
 skin: "/assets/css/skins/default.css"
 locale: en-US
 title: "gam-bit awesome blog"
-description: "여기가 블로그 설명하는 부분"
+description: "DONE IS BETTER THAN PERFECT"
 baseurl:  # the subpath of your site, e.g. "/blog"
 url:  # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 logo: # path of site logo, e.g. "/images/logo.png"
@@ -29,10 +29,10 @@ mathjax:
   enable: # MathJax equations, e.g. true, false (default)
   combo:  # "tex-svg" (default), "tex-mml-chtml", etc.: docs.mathjax.org/en/latest/web/components/combined.html
   tags:  # "none", "ams" (default), "all"
-google_fonts:
-  - name: "Source Sans Pro"
+# google_fonts:
+  - name: 'Noto Serif KR'
     weights: "400,400i,700,700i"
-  - name: "Lora"
+  - name: "Nanum Gothic"
     weights: "400,400i,700,700i"
 google_analytics: # Google Analytics id, e.g. "UA-NNNNNNNN-N"
 disqus:
@@ -90,8 +90,8 @@ defaults:
       share: true
 
 # Site Author
-author: "gam-bit"
-  name:
+author: 
+  name: "gam-bit"
   picture:
   email: 
   twitter:
