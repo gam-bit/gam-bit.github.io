@@ -1,0 +1,221 @@
+---
+layout: post
+title:  "plotly에서 slider 사용하기"
+date:   2021-01-27 08:35:00 +0900
+categories: visualization, plotly, python
+---
+
+
+
+## 목표
+- **plotly에서 slider 사용하기!**
+
+![image](https://user-images.githubusercontent.com/58651942/105981566-904bf980-60d9-11eb-9c3d-4b61e3f78c82.png)
+
+- id별로 그래프를 확인할 수 있게 slider를 넣는다!
+
+
+- 사용 데이터
+
+    - [데이콘_시스템 품질 변화로 인한 사용자 불편 예지 AI 경진대회](https://dacon.io/competitions/official/235687/data/)의 데이터 사용
+
+    - `2020-11-01`부터 `2020-11-30`까지 error, quality, problem의 발생 여부를 시각화하여 quality data가 어떻게 생성되는 건지. 다른 데이터와 관련성이 있는지 확인.
+
+        - error : 시스템 에러 로그 데이터
+        - quality : 시스템 퀄리티 로그 데이터
+        - problem : 사용자 불만 접수
+
+
+    - error 로그와 quality 로그, 그리고 problem 발생여부를 시각화해서 quality가 쓸만한 데이터인지 확인.
+    - 결론적으로 quality는 error, problem과 관계없이 다른 요소를 기준으로 쌓이는 것으로 판단됨
+
+
+## plotly
+- plotly는 interactive charts와 maps를 위한 open source graphing 라이브러리
+- 언어는 python, R, JavaScript를 지원
+
+- 여러가지 방법 중, go(graph_object) 사용
+
+    ```python
+    import plotly.graph_objects as go
+    # > 여기에 데이터 생성
+    # > 여기에 layout 생성
+    fig = go.Figure(data=data, layout=layout)
+    ```
+
+- slider는 layout의 요소
+
+
+### 1. plotly 기본 그래프
+
+
+```python
+import plotly.graph_objects as go
+import numpy as np
+
+N = 1000
+t = np.linspace(0, 10, 100)
+y = np.sin(t)
+
+fig = go.Figure(data=go.Scatter(x=t, y=y, mode='markers'))
+fig.show()
+```
+![image](https://user-images.githubusercontent.com/58651942/105969624-ce422100-60cb-11eb-82b2-87b0abd7920d.png)
+
+- `mode='lines+markers'`를 하면 line + marker 형태로 
+- `mode='lines'`를 하면 line plot으로 그려짐
+- 아래의 2번에서 그려보겠음
+
+<br>
+
+```python
+# fig 구조 살펴보기
+print(fig)
+```
+![image](https://user-images.githubusercontent.com/58651942/105969757-f3cf2a80-60cb-11eb-8aad-1b6f0e82ec95.png)
+
+![image](https://user-images.githubusercontent.com/58651942/105971690-25e18c00-60ce-11eb-88df-0140fd1a4d88.png)
+
+- fig는 dictionary 구조로 `data`와 `layout`을 key로 갖고 있음
+- `fig['data']`에는 그래프를 그릴 수 있는 데이터를 갖고 있음
+
+
+
+### 2. plotly multiple 그래프
+
+- 하나의 figure에 여러개 그래프 그리기
+
+```python
+import plotly.graph_objects as go
+import numpy as np
+np.random.seed(1)
+
+N = 100
+random_x = np.linspace(0, 1, N)
+random_y0 = np.random.randn(N) + 5
+random_y1 = np.random.randn(N)
+random_y2 = np.random.randn(N) - 5
+
+fig = go.Figure()
+
+# Add traces
+fig.add_trace(go.Scatter(x=random_x, y=random_y0,
+                    mode='markers', name='markers'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y1,
+                    mode='lines+markers', name='lines+markers'))
+fig.add_trace(go.Scatter(x=random_x, y=random_y2,
+                    mode='lines', name='lines'))
+fig.show()
+```
+
+![image](https://user-images.githubusercontent.com/58651942/105972267-c9cb3780-60ce-11eb-8991-c8e1a57c66a6.png)
+
+- add_trace를 사용하면 `fig['data']`에 데이터가 차곡차곡 쌓임
+- 아래는 add_trace 대신 직접 데이터를 쌓아서 figure에 data를 넣어주는 방식으로 결과는 위와 동일
+
+```python
+# add_trace 대신 data를 list에 넣어서 사용
+
+# 데이터 정의
+np.random.seed(1)
+
+N = 100
+random_x = np.linspace(0, 1, N)
+random_y0 = np.random.randn(N) + 5
+random_y1 = np.random.randn(N)
+random_y2 = np.random.randn(N) - 5
+
+# Add traces
+data = [go.Scatter(x=random_x, y=random_y0, mode='markers', name='markers'),
+        go.Scatter(x=random_x, y=random_y1, mode='lines+markers', name='lines+markers'),
+        go.Scatter(x=random_x, y=random_y2, mode='lines', name='lines')]
+
+fig = go.Figure(data=data)
+
+fig.show()
+```
+
+<br>
+
+```python
+# fig 구조 살펴보기
+print(fig)
+```
+![image](https://user-images.githubusercontent.com/58651942/105978752-3eee3b00-60d6-11eb-8704-e3b4eefb2665.png)
+
+
+- 데이터 정보가 `fig['data']`에 차곡차곡 쌓임
+
+
+
+### 3. plotly multiple 그래프 + slider
+
+- slider는 layout 정보
+- [여기](https://community.plotly.com/t/multiple-traces-with-a-single-slider-in-plotly/16356/2)에 있는 코드를 보고 dacon data에 적용
+
+```python
+%%time
+train_user_lst = train_e.user_id.unique().tolist()
+train_user_lst = random.sample(train_user_lst, 10) # 10개만 랜덤으로 추려서 그림
+dt_range = pd.date_range('2020-11-01', '2020-11-30', freq='1d')
+
+# 각 데이터를 날짜순으로 나열
+df_e = train_e.set_index('time')
+df_q = train_q.set_index('time')
+df_p = train_p.set_index('time')
+
+
+trace_lst_e = []
+trace_lst_q = []
+trace_lst_p = []
+
+for id in train_user_lst:
+    
+    dt_e = df_e[df_e['user_id']==id].resample('1d').count()['user_id'].to_frame('is_error')
+    dt_e['is_error'] = 1
+    dt_e = dt_e.reindex(dt_range, fill_value=0)
+    dt_q = df_q[df_q['user_id']==id].resample('1d').count()['user_id'].to_frame('is_quality')
+    dt_q['is_quality'] = 1
+    dt_q = dt_q.reindex(dt_range, fill_value=0)
+    dt_p = df_p[df_p['user_id']==id].resample('1d').count()['user_id'].to_frame('is_problem')
+    dt_p['is_problem'] = 1
+    dt_p = dt_p.reindex(dt_range, fill_value=0)
+
+    if id == train_user_lst[0]:
+        trace_lst_e.append(go.Scatter(x=dt_range, y=dt_e['is_error'].values, mode='markers', opacity=0.5, name='error', visible=True))
+        trace_lst_q.append(go.Scatter(x=dt_range, y=dt_q['is_quality'].values, mode = 'markers', opacity=0.5, marker_size=8, name='quality', visible=True))
+        trace_lst_p.append(go.Scatter(x=dt_range, y=dt_p['is_problem'].values, mode = 'markers', opacity=0.5, marker_size=12, name='problem', visible=True))
+        
+    else:
+        trace_lst_e.append(go.Scatter(x=dt_range, y=dt_e['is_error'].values, mode='markers', opacity=0.5, name='error', visible=False))
+        trace_lst_q.append(go.Scatter(x=dt_range, y=dt_q['is_quality'].values, mode = 'markers', opacity=0.5, marker_size=8, name='quality', visible=False))
+        trace_lst_p.append(go.Scatter(x=dt_range, y=dt_p['is_problem'].values, mode = 'markers', opacity=0.5, marker_size=12, name='problem', visible=False))
+    
+fig = go.Figure(data=trace_lst_e + trace_lst_q + trace_lst_p)
+
+steps = []
+for i in range(len(train_user_lst)):
+    step = dict(
+        method = 'restyle',
+        args = ['visible', [False] * len(fig.data)],
+    )
+    step['label'] = train_user_lst[i]
+    step['args'][1][i] = True # Toggle i'th trace to "visible"
+    step['args'][1][i+len(train_user_lst)] = True
+    step['args'][1][i+len(train_user_lst)*2] = True
+    steps.append(step)   
+
+sliders = [dict(
+    # active = train_user_lst[0], # 그래프 처음 로딩됐을 때 slider 위치
+    currentvalue = {"prefix": "user_id: "},
+    pad = {"t": 50}, # 그래프와 슬라이더 사이 거리  
+    steps = steps,
+)]
+
+fig.layout.sliders = sliders
+
+fig.show();
+```
+![](https://im7.ezgif.com/tmp/ezgif-7-0c7d1870a994.gif)
+
+- 아래의 slider 값을 옮기면 그래프가 바뀌는 것을 확인할 수 있음
