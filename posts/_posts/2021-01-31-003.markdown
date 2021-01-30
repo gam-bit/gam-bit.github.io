@@ -1,0 +1,84 @@
+---
+layout: post
+title:  "그래디언트 부스팅(Gradient boosting)"
+categories: machine learning
+---
+
+## 1. 그래디언트 부스팅이란?
+---
+
+Gradient Boosting은 회귀와 분류 문제를 해결할 때 사용하는 머신러닝 기법으로, decision tree 형태인 여러개의 weak learner를 앙상블한 모델이다. weak learner들은 이전 모델의 단점(residual)을 보완하는 모델이라 모델끼리 서로 종속적이다. 원하는 만큼의 weak learner를 생성한 후, 모든 weak learner를 weighted sum하여 하나의 strong learner를 만든다. 
+
+<br>
+
+- 부스팅 알고리즘 
+  
+![image](https://user-images.githubusercontent.com/58651942/106362973-16ca3a80-6369-11eb-85f3-e7adeefa2492.png)
+
+
+![image](https://user-images.githubusercontent.com/58651942/106362991-29dd0a80-6369-11eb-9850-6310e6160da9.png)
+
+알고리즘을 해석해보면, 처음에 f_hat=y_hat=0으로 잡고 시작한다. 이 때 residual = y-y_hat = y-0 = y가 된다. 그 다음부터는 residual에 적합시킨 새로운 모델을 만들고 그것을 기존 모델에 추가시켜 residual을 줄여나간다. 이를 시각화하면 다음과 같다.
+
+<br>
+
+![image](https://user-images.githubusercontent.com/58651942/106363056-8a6c4780-6369-11eb-9469-ffe4faf0ef0f.png)
+
+
+초록색 그래프는 우리가 갖고 있는 변수 1개짜리 데이터를 나타낸다. 이 데이터의 y를 예측하는 모델을 만들려고 한다. 오른쪽 파란색 그래프 tree1, 2, 3이 weak learner들이다. 결론적으로 이 세 개의 tree를 결합해서(ensemble) 하나의 모델을 만드는 것이 부스팅이다.
+
+tree1, 2, 3이 어떻게 나왔는지 그 과정을 살펴보자. 처음에는 주어진 데이터 그대로를 이용해서 tree1을 생성한다. 그러면 tree1으로 예측한 값과 실제값 사이에 차이(*pseudo residual)가 생긴다. 그 residual에 적합시킨 모델이 tree2이다. (tree2 그래프에 찍힌 점은 residual을 나타난다.) 즉, tree2는 tree1이 놓친 부분을 보완해주는 역할을 하는 것이다. 그런데 tree2도 설명하지 못하는 부분이 나타난다. tree2로 예측한 값과 (tree1이 생성한)residual 사이에 또 다시 차이(pseudo residual)가 생기는 거다. 그 차이를 또 보완하기 위해 tree3를 생성한다. 이렇게 만든 3개의 트리를 결합하여 앙상블 모델을 만들면 다음과 같다.
+
+```
+pseudo residual: 
+이 때 만들어진 residual은 실제 residual이 아니라 모델을 생성하는 과정에서 만들어진 residual이므로 pseudo residual이라 한다.
+```
+
+
+$$\hat{f}=a\cdot tree1+b\cdot tree2+c\cdot tree3$$
+
+<br>
+<br>
+
+## 2. 그래디언트 부스팅이라고 하는 이유
+---
+왜 gradient boosting이라고 할까?
+
+
+$$\hat{F\left(x_i\right)}=\hat{F_m\left(x_i\right)}=\sum _{b=1}^m\lambda _i\hat{f^b\left(x_i\right)}\left(m=1,\ 2,\ 3,\ ...,\ B\right)$$	
+
+$$loss\ function=J\left(y_{i,}\hat{F}\left(x_i\right)\right)=\frac{1}{2}\left(y_i-\hat{F}\left(x_i\right)\right)^2$$
+​
+$$gradient\ =\ \frac{\partial J}{\partial \hat{F\left(x_i\right)}}=-y_i+\hat{F\left(x_i\right)}$$ 	
+​
+$$negative\ gradient\ =\ y_i-\hat{F\left(x_i\right)}=pseudo\ residual$$
+
+
+loss function을 square loss라고 할 때, 이것의 negative gradient=pseudo residual이 된다. 우리는 각 tree(weak learner) 하나하나를 pseudo residual에 적합하면서 이 값이 0에 가까워지길 바란다. 이는 gradient를 사용하면서 gradient가 0에 가까워지길 바라는 것과 같고 이 개념은 gradient descent와 일맥상통한다. 이런 이유로 위의 부스팅을 gradient boosting이라 한다. 이 개념을 통해 loss function이 square loss가 아니더라도 gradient boosting이라 부르게 되었다.
+
+<br>
+<br>
+
+## 3. 부스팅의 자세한 내용
+---
+
+- https://homes.cs.washington.edu/~tqchen/data/pdf/BoostedTree.pdf
+
+워싱턴 대학 수업자료 <Introduction to Boosted Trees>-Tianqi Chen 로 공부했음
+
+
+
+
+
+<Reference>
+
+- ISLR
+
+- https://en.wikipedia.org/wiki/Gradient_boosting 위키피디아-Gradient boosting
+
+- https://3months.tistory.com/368
+
+- https://homes.cs.washington.edu/~tqchen/data/pdf/BoostedTree.pdf
+
+- 워싱턴 대학 수업자료 \<Introduction to Boosted Trees>-Tianqi Chen
+
